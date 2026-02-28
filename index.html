@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>For You | My Love 💕</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -19,6 +19,7 @@
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
         }
 
         html, body {
@@ -200,7 +201,7 @@
             flex-wrap: wrap;
             z-index: 15;
             pointer-events: auto;
-            min-height: 80px; /* Ensure consistent height */
+            min-height: 80px;
         }
 
         /* Yes button - normal */
@@ -218,31 +219,31 @@
             transform: scale(1.05) translateY(-3px);
         }
 
-        /* No button container - fixed layout approach */
+        /* No button wrapper - preserves layout space */
         .no-btn-wrapper {
             position: relative;
             display: inline-block;
             width: auto;
             height: auto;
             z-index: 25;
-            pointer-events: none; /* Let clicks pass through to the moving layer */
+            pointer-events: none;
         }
 
-        /* The actual button that moves - but stays in layout flow */
+        /* The actual button that moves */
         .no-btn-mover {
             position: relative;
             display: inline-block;
             transform: translate(0, 0);
-            transition: transform 0.03s linear; /* Fast but smooth */
+            transition: transform 0.05s linear;
             will-change: transform;
-            pointer-events: auto; /* This layer catches pointer events */
+            pointer-events: auto;
         }
 
         .no-btn-mover .btn-base {
             margin: 0;
             min-width: clamp(120px, 40vw, 140px);
             white-space: nowrap;
-            pointer-events: none; /* Button itself doesn't need events, container moves */
+            pointer-events: none;
             background: transparent;
             color: var(--rose);
             border: 2px solid var(--rose);
@@ -263,6 +264,32 @@
         .no-message.show {
             opacity: 1;
             animation: shimmer 2s infinite;
+        }
+
+        /* FIXED MESSAGE CONTAINER FOR MOBILE */
+        .message-container {
+            max-width: min(800px, 90vw);
+            padding: clamp(25px, 6vw, 40px);
+            background: rgba(0,0,0,0.4);
+            border-radius: 30px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            margin: 15px auto;
+            height: 70vh; /* Slightly smaller for mobile */
+            overflow-y: hidden;
+            position: relative;
+            pointer-events: auto;
+            border: 1px solid rgba(244, 194, 194, 0.2);
+            box-shadow: 0 0 50px rgba(244, 194, 194, 0.1);
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+        }
+
+        .message-content {
+            position: relative;
+            width: 100%;
+            padding-bottom: 50px;
+            transform: translateY(0);
+            will-change: transform;
         }
 
         .msg-line {
@@ -409,29 +436,6 @@
             white-space: nowrap;
             pointer-events: auto;
             z-index: 20;
-        }
-
-        .message-container {
-            max-width: min(800px, 90vw);
-            padding: clamp(25px, 6vw, 40px);
-            background: rgba(0,0,0,0.4);
-            border-radius: 30px;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            margin: 15px auto;
-            height: 75vh;
-            overflow-y: hidden;
-            position: relative;
-            scroll-behavior: smooth;
-            pointer-events: auto;
-            border: 1px solid rgba(244, 194, 194, 0.2);
-            box-shadow: 0 0 50px rgba(244, 194, 194, 0.1);
-        }
-
-        .message-content {
-            position: relative;
-            width: 100%;
-            padding-bottom: 50px;
         }
 
         .princess-line {
@@ -584,7 +588,6 @@
             50% { filter: drop-shadow(0 0 60px var(--gold)) brightness(1.4); }
         }
 
-        /* Thrilling explosion elements */
         .sparkle {
             position: absolute;
             color: var(--gold);
@@ -742,17 +745,14 @@
         <button class="btn-base" id="continueBtn">Continue to My Heart 💝</button>
     </section>
 
-    <!-- Phase 2: Forgiveness Choice with PERFECT LAYOUT and impossible-to-click No button -->
+    <!-- Phase 2: Forgiveness Choice -->
     <section id="phase-2">
         <h2 class="gold-text">Will you forgive me?</h2>
         <div class="love-note" style="margin-bottom: 20px;">Your forgiveness means everything to me</div>
         
-        <!-- Button layout container - maintains perfect alignment -->
         <div class="btn-wrap">
-            <!-- Yes button - normal, always clickable -->
             <button class="btn-base" id="forgiveYesBtn">Yes, I forgive you 💕</button>
             
-            <!-- No button wrapper - preserves layout space while button moves inside -->
             <div class="no-btn-wrapper">
                 <div id="noBtnMover" class="no-btn-mover">
                     <button class="btn-base" id="forgiveNoBtn">No</button>
@@ -760,7 +760,6 @@
             </div>
         </div>
         
-        <!-- Message appears when trying to catch No -->
         <div id="noMessage" class="no-message">💖 There's no "No" when it comes to us... 💖</div>
     </section>
 
@@ -769,23 +768,15 @@
         <div class="gift-container">
             <div class="gift-box" id="giftBox">
                 <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
-                    <!-- Gift box base -->
                     <rect x="40" y="80" width="120" height="80" fill="#d4af37" opacity="0.9" class="box"/>
-                    <!-- Gift box lid -->
                     <rect x="35" y="55" width="130" height="30" fill="#f4c2c2" opacity="0.9" class="lid"/>
-                    <!-- Horizontal ribbon -->
                     <rect x="40" y="100" width="120" height="10" fill="#e6b3b3" opacity="0.9" class="ribbon"/>
-                    <!-- Vertical ribbon -->
                     <rect x="90" y="80" width="20" height="80" fill="#e6b3b3" opacity="0.9" class="ribbon"/>
-                    <!-- Bow center -->
                     <circle cx="100" cy="67" r="8" fill="#e6b3b3" opacity="0.9" class="bow"/>
-                    <!-- Bow loops -->
                     <path d="M85 60 Q 75 50 70 40" stroke="#e6b3b3" stroke-width="6" fill="none" stroke-linecap="round" class="bow"/>
                     <path d="M115 60 Q 125 50 130 40" stroke="#e6b3b3" stroke-width="6" fill="none" stroke-linecap="round" class="bow"/>
-                    <!-- Bow tails -->
                     <path d="M92 75 L 82 95" stroke="#e6b3b3" stroke-width="5" fill="none" stroke-linecap="round" class="bow"/>
                     <path d="M108 75 L 118 95" stroke="#e6b3b3" stroke-width="5" fill="none" stroke-linecap="round" class="bow"/>
-                    <!-- Sparkles -->
                     <circle cx="150" cy="40" r="4" fill="#f4c2c2" opacity="0.8">
                         <animate attributeName="opacity" values="0.2;1;0.2" dur="2s" repeatCount="indefinite" />
                         <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite" />
@@ -807,7 +798,7 @@
         <p class="love-note">Click the button to unleash the magic...</p>
     </section>
 
-    <!-- Phase 4: Heartfelt Sincere Message with CONTINUOUS AUTO-SCROLL -->
+    <!-- Phase 4: Heartfelt Sincere Message with FIXED AUTO-SCROLL -->
     <section id="phase-4">
         <div class="message-container" id="messageContainer">
             <div class="message-content" id="messageContent">
@@ -821,23 +812,17 @@
                 <span class="msg-line">You deserve all the love and joy this world has to offer.</span>
                 <span class="msg-line">Thank you for being you, for every smile, every laugh, every moment.</span>
                 
-                <!-- This is the trigger line - when this appears, scroll speeds up -->
                 <span class="msg-line" id="triggerLine" style="color: var(--rose); font-weight: 600; font-size: clamp(1.4rem, 5vw, 1.8rem);">Take care of yourself, my love.</span>
                 
-                <!-- Extra spacing for large screens -->
                 <div class="spacer"></div>
                 
-                <!-- Special princess line with enhanced styling -->
                 <span class="msg-line princess-line">Happy Birthday, my princess 👑</span>
                 
-                <!-- Decorative elements for visual height -->
                 <div class="heart-row">💕 💖 💗</div>
                 
-                <!-- Additional romantic elements for scroll length -->
                 <div class="signature">Forever yours,</div>
                 <div class="signature" style="font-size: 2rem; margin-top: 10px;">Your Love ❤️</div>
                 
-                <!-- Extra hearts for scroll length -->
                 <div style="margin-top: 40px; font-size: 2rem; opacity: 0.7;">✨ 🌟 ✨</div>
                 <div style="margin-top: 30px; font-size: 1.5rem; color: var(--rose);">With all my heart</div>
                 <div style="margin-top: 40px; font-size: 2rem;">💝 💘 💖</div>
@@ -859,7 +844,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded - initializing...');
+            console.log('DOM loaded - initializing with FIXED MOBILE SCROLLING...');
             
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
@@ -892,22 +877,18 @@
             let speedIncreased = false;
             let giftOpened = false;
             let messageTimeout = null;
+            let isScrolling = false;
+            let rafId = null;
 
-            // ----- PERFECT LAYOUT: IMPOSSIBLE-TO-CLICK NO BUTTON (moves but preserves layout) -----
+            // ----- MOVING NO BUTTON -----
             if (forgiveNoBtn && noBtnMover) {
-                // Make the button itself non-clickable, but the mover catches events
                 forgiveNoBtn.style.pointerEvents = 'none';
-                
-                // Maximum movement range (pixels) - keeps button within layout visually
                 const MAX_MOVE = 40;
-                
-                // Function to move button away from pointer
+
                 const moveAway = function(e) {
-                    // Only active in phase-2
                     const phase2 = document.getElementById('phase-2');
                     if (!phase2 || !phase2.classList.contains('active')) return;
 
-                    // Get pointer coordinates
                     let clientX, clientY;
                     if (e.touches) {
                         clientX = e.touches[0].clientX;
@@ -918,54 +899,37 @@
                     }
 
                     const moverRect = noBtnMover.getBoundingClientRect();
-                    
-                    // Calculate center of the mover
                     const centerX = moverRect.left + moverRect.width / 2;
                     const centerY = moverRect.top + moverRect.height / 2;
                     
-                    // Distance between pointer and button center
                     const deltaX = clientX - centerX;
                     const deltaY = clientY - centerY;
                     const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
                     
-                    // If pointer is within 150px, move button away
                     if (dist < 150) {
-                        // Direction away from pointer
                         const angle = Math.atan2(deltaY, deltaX);
-                        
-                        // Move distance based on proximity - more force when closer
                         const force = Math.min(MAX_MOVE, (150 - dist) * 0.8);
                         const moveX = -Math.cos(angle) * force;
                         const moveY = -Math.sin(angle) * force;
                         
-                        // Apply transform - keeps layout space but button visually moves
                         noBtnMover.style.transform = `translate(${moveX}px, ${moveY}px)`;
                         
-                        // Show message
                         if (noMessage) {
                             noMessage.classList.add('show');
-                            
-                            // Clear previous timeout
                             if (messageTimeout) clearTimeout(messageTimeout);
-                            
-                            // Hide message after 2 seconds
                             messageTimeout = setTimeout(() => {
                                 noMessage.classList.remove('show');
                             }, 2000);
                         }
                     } else {
-                        // Gradually return to center when pointer is far
                         const currentTransform = noBtnMover.style.transform;
                         if (currentTransform && currentTransform !== 'none') {
                             const match = currentTransform.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
                             if (match) {
                                 let x = parseFloat(match[1]);
                                 let y = parseFloat(match[2]);
-                                
-                                // Smoothly return to zero
                                 x *= 0.85;
                                 y *= 0.85;
-                                
                                 if (Math.abs(x) < 0.5 && Math.abs(y) < 0.5) {
                                     noBtnMover.style.transform = 'none';
                                 } else {
@@ -976,17 +940,12 @@
                     }
                 };
 
-                // Attach move listeners
                 window.addEventListener('mousemove', moveAway);
                 window.addEventListener('touchmove', moveAway, { passive: false });
                 
-                // Prevent any accidental clicks on the mover
                 noBtnMover.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Attempted to click No button - impossible!');
-                    
-                    // Show message on click attempt too
                     if (noMessage) {
                         noMessage.classList.add('show');
                         if (messageTimeout) clearTimeout(messageTimeout);
@@ -998,6 +957,105 @@
                 });
             }
 
+            // ----- FIXED AUTO-SCROLL FOR MOBILE -----
+            function startContinuousScroll() {
+                if (scrollInterval) {
+                    clearInterval(scrollInterval);
+                    scrollInterval = null;
+                }
+                
+                if (!messageContainer || !messageContent) return;
+                
+                // Reset scroll position
+                messageContainer.scrollTop = 0;
+                scrollPosition = 0;
+                speedIncreased = false;
+                currentSpeed = 0.15;
+                
+                // Use requestAnimationFrame for smoother animation on mobile
+                function smoothScroll() {
+                    if (!messageContainer || !document.getElementById('phase-4').classList.contains('active')) {
+                        if (rafId) {
+                            cancelAnimationFrame(rafId);
+                            rafId = null;
+                        }
+                        return;
+                    }
+                    
+                    // Check trigger line
+                    checkTriggerLinePosition();
+                    
+                    // Update scroll position
+                    scrollPosition += currentSpeed;
+                    
+                    if (scrollPosition >= maxScroll) {
+                        messageContainer.scrollTop = maxScroll;
+                        if (rafId) {
+                            cancelAnimationFrame(rafId);
+                            rafId = null;
+                        }
+                        setTimeout(() => {
+                            goToPhase(5);
+                        }, 2500);
+                        return;
+                    } else {
+                        messageContainer.scrollTop = scrollPosition;
+                    }
+                    
+                    // Continue animation
+                    rafId = requestAnimationFrame(smoothScroll);
+                }
+                
+                // Calculate max scroll after a short delay to ensure DOM is ready
+                setTimeout(() => {
+                    const containerHeight = messageContainer.clientHeight;
+                    const contentHeight = messageContent.scrollHeight;
+                    
+                    maxScroll = contentHeight - containerHeight;
+                    console.log('Max scroll calculated:', maxScroll);
+                    
+                    if (maxScroll < 50) maxScroll = 300; // Fallback
+                    
+                    // Start smooth scroll animation
+                    if (rafId) cancelAnimationFrame(rafId);
+                    rafId = requestAnimationFrame(smoothScroll);
+                    
+                }, 500);
+            }
+            
+            function stopContinuousScroll() {
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+                if (scrollInterval) {
+                    clearInterval(scrollInterval);
+                    scrollInterval = null;
+                }
+            }
+
+            function checkTriggerLinePosition() {
+                if (!messageContainer || speedIncreased || !triggerLine) return;
+                
+                const triggerTop = triggerLine.offsetTop;
+                const currentScroll = messageContainer.scrollTop;
+                const containerHeight = messageContainer.clientHeight;
+                
+                const triggerVisible = triggerTop - currentScroll < containerHeight - 50;
+                
+                if (triggerVisible && !speedIncreased) {
+                    speedIncreased = true;
+                    currentSpeed = 1.2; // Speed up
+                    console.log('Trigger line reached - speeding up!');
+                    
+                    // Celebration hearts
+                    for (let i = 0; i < 12; i++) {
+                        setTimeout(createHeart, i * 50);
+                    }
+                }
+            }
+
+            // ----- OTHER FUNCTIONS (unchanged) -----
             function createSparkle() {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'sparkle';
@@ -1161,7 +1219,9 @@
             window.goToPhase = function(phaseNumber) {
                 console.log('Going to phase:', phaseNumber);
                 
-                if (phaseNumber !== 4 && scrollInterval) stopContinuousScroll();
+                if (phaseNumber !== 4) {
+                    stopContinuousScroll();
+                }
                 
                 document.querySelectorAll('section').forEach(section => {
                     section.classList.remove('active');
@@ -1172,81 +1232,6 @@
                     targetSection.classList.add('active');
                 }
             };
-
-            function checkTriggerLinePosition() {
-                if (!messageContainer || speedIncreased || !triggerLine) return;
-                
-                const triggerTop = triggerLine.offsetTop;
-                const currentScroll = messageContainer.scrollTop;
-                const containerHeight = messageContainer.clientHeight;
-                
-                const triggerVisible = triggerTop - currentScroll < containerHeight - 50;
-                
-                if (triggerVisible && !speedIncreased) {
-                    speedIncreased = true;
-                    currentSpeed = 1.2;
-                    console.log('Trigger line reached - speeding up!');
-                    for (let i = 0; i < 12; i++) {
-                        setTimeout(createHeart, i * 50);
-                    }
-                }
-            }
-
-            function startContinuousScroll() {
-                if (scrollInterval) clearInterval(scrollInterval);
-                
-                if (!messageContainer || !messageContent) return;
-                
-                messageContainer.scrollTop = 0;
-                scrollPosition = 0;
-                speedIncreased = false;
-                currentSpeed = 0.15;
-                
-                setTimeout(() => {
-                    messageContent.style.display = 'block';
-                    
-                    const containerHeight = messageContainer.clientHeight;
-                    const contentHeight = messageContent.scrollHeight;
-                    
-                    maxScroll = contentHeight - containerHeight;
-                    
-                    console.log('Container height:', containerHeight);
-                    console.log('Content height:', contentHeight);
-                    console.log('Max scroll:', maxScroll);
-                    
-                    if (maxScroll < 50) maxScroll = 300;
-                    
-                    scrollInterval = setInterval(() => {
-                        if (!messageContainer) {
-                            stopContinuousScroll();
-                            return;
-                        }
-                        
-                        checkTriggerLinePosition();
-                        
-                        scrollPosition += currentSpeed;
-                        
-                        if (scrollPosition >= maxScroll) {
-                            messageContainer.scrollTop = maxScroll;
-                            stopContinuousScroll();
-                            
-                            setTimeout(() => {
-                                goToPhase(5);
-                            }, 2500);
-                        } else {
-                            messageContainer.scrollTop = scrollPosition;
-                        }
-                    }, 20);
-                    
-                }, 500);
-            }
-            
-            function stopContinuousScroll() {
-                if (scrollInterval) {
-                    clearInterval(scrollInterval);
-                    scrollInterval = null;
-                }
-            }
 
             async function revealText() {
                 const lines = document.querySelectorAll('.msg-line');
@@ -1368,6 +1353,7 @@
                 });
             }
 
+            // Initialize
             resizeCanvas();
             initParticles();
             animateParticles();
@@ -1379,7 +1365,7 @@
             }
 
             setInterval(() => {
-                if (!giftOpened && document.getElementById('phase-3').classList.contains('active')) {
+                if (!giftOpened && document.getElementById('phase-3')?.classList.contains('active')) {
                     createAnticipationSparkle();
                 }
             }, 500);
@@ -1389,7 +1375,7 @@
             window.addEventListener('beforeunload', function() {
                 if (animationFrame) cancelAnimationFrame(animationFrame);
                 if (heartInterval) clearInterval(heartInterval);
-                if (scrollInterval) clearInterval(scrollInterval);
+                stopContinuousScroll();
             });
         });
     </script>
