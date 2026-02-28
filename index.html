@@ -219,7 +219,7 @@
             transform: scale(1.05) translateY(-3px);
         }
 
-        /* No button wrapper - preserves layout space */
+        /* No button wrapper - desktop version (moves) */
         .no-btn-wrapper {
             position: relative;
             display: inline-block;
@@ -229,7 +229,6 @@
             pointer-events: none;
         }
 
-        /* The actual button that moves */
         .no-btn-mover {
             position: relative;
             display: inline-block;
@@ -249,6 +248,11 @@
             border: 2px solid var(--rose);
         }
 
+        /* Mobile No button - hidden on touch */
+        .mobile-no-btn {
+            display: none; /* Hidden by default, shown only on mobile */
+        }
+
         /* Message shown when trying to click No */
         .no-message {
             font-family: 'Dancing Script', cursive;
@@ -259,6 +263,7 @@
             transition: opacity 0.5s ease;
             min-height: 60px;
             pointer-events: none;
+            text-shadow: 0 0 20px var(--gold);
         }
 
         .no-message.show {
@@ -266,7 +271,33 @@
             animation: shimmer 2s infinite;
         }
 
-        /* FIXED MESSAGE CONTAINER FOR MOBILE */
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .no-btn-wrapper {
+                display: none; /* Hide desktop moving button on mobile */
+            }
+            
+            .mobile-no-btn {
+                display: inline-block;
+                position: relative;
+            }
+            
+            .mobile-no-btn .btn-base {
+                margin: 0;
+                min-width: clamp(120px, 40vw, 140px);
+                white-space: nowrap;
+                background: transparent;
+                color: var(--rose);
+                border: 2px solid var(--rose);
+            }
+            
+            .mobile-no-btn.hidden {
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+        }
+
         .message-container {
             max-width: min(800px, 90vw);
             padding: clamp(25px, 6vw, 40px);
@@ -275,13 +306,13 @@
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             margin: 15px auto;
-            height: 70vh; /* Slightly smaller for mobile */
+            height: 70vh;
             overflow-y: hidden;
             position: relative;
             pointer-events: auto;
             border: 1px solid rgba(244, 194, 194, 0.2);
             box-shadow: 0 0 50px rgba(244, 194, 194, 0.1);
-            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
         .message-content {
@@ -745,22 +776,30 @@
         <button class="btn-base" id="continueBtn">Continue to My Heart 💝</button>
     </section>
 
-    <!-- Phase 2: Forgiveness Choice -->
+    <!-- Phase 2: Forgiveness Choice with FIXED No button for both desktop and mobile -->
     <section id="phase-2">
         <h2 class="gold-text">Will you forgive me?</h2>
         <div class="love-note" style="margin-bottom: 20px;">Your forgiveness means everything to me</div>
         
         <div class="btn-wrap">
+            <!-- Yes button - always works -->
             <button class="btn-base" id="forgiveYesBtn">Yes, I forgive you 💕</button>
             
+            <!-- DESKTOP: Moving No button (hidden on mobile) -->
             <div class="no-btn-wrapper">
                 <div id="noBtnMover" class="no-btn-mover">
                     <button class="btn-base" id="forgiveNoBtn">No</button>
                 </div>
             </div>
+            
+            <!-- MOBILE: Simple No button that hides on touch (shown only on mobile) -->
+            <div id="mobileNoBtn" class="mobile-no-btn">
+                <button class="btn-base" id="mobileForgiveNoBtn">No</button>
+            </div>
         </div>
         
-        <div id="noMessage" class="no-message">💖 There's no "No" when it comes to us... 💖</div>
+        <!-- Message shown when trying to click No (both desktop and mobile) -->
+        <div id="noMessage" class="no-message"></div>
     </section>
 
     <!-- Phase 3: The Surprise Tap with Vibrating Gift Box -->
@@ -798,7 +837,7 @@
         <p class="love-note">Click the button to unleash the magic...</p>
     </section>
 
-    <!-- Phase 4: Heartfelt Sincere Message with FIXED AUTO-SCROLL -->
+    <!-- Phase 4: Heartfelt Sincere Message with AUTO-SCROLL -->
     <section id="phase-4">
         <div class="message-container" id="messageContainer">
             <div class="message-content" id="messageContent">
@@ -838,13 +877,15 @@
         <button class="play-video-btn" id="playVideoBtn">Play Our Special Video 🎬</button>
     </section>
 
-    <audio id="bgMusic" loop>
-        <source src="https://www.chosic.com/wp-content/uploads/2021/04/And-So-It-Begins-Inspired-By-Crush-Sometimes.mp3" type="audio/mpeg">
+    <!-- FIXED AUDIO - Using multiple sources for reliability -->
+    <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
+        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
     </audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded - initializing with FIXED MOBILE SCROLLING...');
+            console.log('DOM loaded - initializing with FIXED AUDIO and MOBILE NO BUTTON...');
             
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
@@ -861,6 +902,8 @@
             const continueBtn = document.getElementById('continueBtn');
             const forgiveYesBtn = document.getElementById('forgiveYesBtn');
             const forgiveNoBtn = document.getElementById('forgiveNoBtn');
+            const mobileForgiveNoBtn = document.getElementById('mobileForgiveNoBtn');
+            const mobileNoBtn = document.getElementById('mobileNoBtn');
             const noBtnMover = document.getElementById('noBtnMover');
             const noMessage = document.getElementById('noMessage');
             const surpriseBtn = document.getElementById('surpriseBtn');
@@ -877,10 +920,34 @@
             let speedIncreased = false;
             let giftOpened = false;
             let messageTimeout = null;
-            let isScrolling = false;
             let rafId = null;
+            let audioPlayed = false;
 
-            // ----- MOVING NO BUTTON -----
+            // ----- FIXED AUDIO INITIALIZATION -----
+            function initAudio() {
+                music.volume = 0.3;
+                // Try to play audio (browsers require user interaction)
+                document.addEventListener('touchstart', function playOnTouch() {
+                    if (!audioPlayed) {
+                        music.play().catch(e => console.log('Audio play error:', e));
+                        audioPlayed = true;
+                    }
+                    document.removeEventListener('touchstart', playOnTouch);
+                });
+                
+                document.addEventListener('click', function playOnClick() {
+                    if (!audioPlayed) {
+                        music.play().catch(e => console.log('Audio play error:', e));
+                        audioPlayed = true;
+                    }
+                    document.removeEventListener('click', playOnClick);
+                });
+            }
+            
+            // Call audio init
+            initAudio();
+
+            // ----- DESKTOP MOVING NO BUTTON -----
             if (forgiveNoBtn && noBtnMover) {
                 forgiveNoBtn.style.pointerEvents = 'none';
                 const MAX_MOVE = 40;
@@ -888,6 +955,9 @@
                 const moveAway = function(e) {
                     const phase2 = document.getElementById('phase-2');
                     if (!phase2 || !phase2.classList.contains('active')) return;
+
+                    // Don't move on mobile
+                    if (window.innerWidth <= 768) return;
 
                     let clientX, clientY;
                     if (e.touches) {
@@ -914,99 +984,96 @@
                         
                         noBtnMover.style.transform = `translate(${moveX}px, ${moveY}px)`;
                         
+                        // Show message
                         if (noMessage) {
+                            noMessage.textContent = "😂 Nice try! Can't catch me!";
                             noMessage.classList.add('show');
                             if (messageTimeout) clearTimeout(messageTimeout);
                             messageTimeout = setTimeout(() => {
                                 noMessage.classList.remove('show');
-                            }, 2000);
-                        }
-                    } else {
-                        const currentTransform = noBtnMover.style.transform;
-                        if (currentTransform && currentTransform !== 'none') {
-                            const match = currentTransform.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
-                            if (match) {
-                                let x = parseFloat(match[1]);
-                                let y = parseFloat(match[2]);
-                                x *= 0.85;
-                                y *= 0.85;
-                                if (Math.abs(x) < 0.5 && Math.abs(y) < 0.5) {
-                                    noBtnMover.style.transform = 'none';
-                                } else {
-                                    noBtnMover.style.transform = `translate(${x}px, ${y}px)`;
-                                }
-                            }
+                            }, 1500);
                         }
                     }
                 };
 
                 window.addEventListener('mousemove', moveAway);
                 window.addEventListener('touchmove', moveAway, { passive: false });
+            }
+
+            // ----- MOBILE NO BUTTON - HIDES ON FIRST TOUCH -----
+            if (mobileForgiveNoBtn && mobileNoBtn) {
+                let touchCount = 0;
                 
-                noBtnMover.addEventListener('click', function(e) {
+                mobileForgiveNoBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (noMessage) {
-                        noMessage.classList.add('show');
-                        if (messageTimeout) clearTimeout(messageTimeout);
-                        messageTimeout = setTimeout(() => {
-                            noMessage.classList.remove('show');
-                        }, 2000);
+                    
+                    touchCount++;
+                    
+                    if (touchCount === 1) {
+                        // First touch - hide button and show message
+                        mobileNoBtn.classList.add('hidden');
+                        if (noMessage) {
+                            noMessage.textContent = "🙅‍♂️ Sorry! You cannot touch me!";
+                            noMessage.classList.add('show');
+                        }
+                    } else {
+                        // Subsequent touches - just show message
+                        if (noMessage) {
+                            noMessage.textContent = "😘 Only Yes works, my love!";
+                            noMessage.classList.add('show');
+                        }
                     }
+                    
+                    // Clear message after 2 seconds
+                    if (messageTimeout) clearTimeout(messageTimeout);
+                    messageTimeout = setTimeout(() => {
+                        noMessage.classList.remove('show');
+                    }, 2000);
+                    
                     return false;
                 });
+                
+                // Also handle touch events
+                mobileForgiveNoBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    touchCount++;
+                    
+                    if (touchCount === 1) {
+                        mobileNoBtn.classList.add('hidden');
+                        if (noMessage) {
+                            noMessage.textContent = "🙅‍♂️ Sorry! You cannot touch me!";
+                            noMessage.classList.add('show');
+                        }
+                    } else {
+                        if (noMessage) {
+                            noMessage.textContent = "😘 Only Yes works, my love!";
+                            noMessage.classList.add('show');
+                        }
+                    }
+                    
+                    if (messageTimeout) clearTimeout(messageTimeout);
+                    messageTimeout = setTimeout(() => {
+                        noMessage.classList.remove('show');
+                    }, 2000);
+                    
+                    return false;
+                }, { passive: false });
             }
 
             // ----- FIXED AUTO-SCROLL FOR MOBILE -----
             function startContinuousScroll() {
-                if (scrollInterval) {
-                    clearInterval(scrollInterval);
-                    scrollInterval = null;
-                }
+                stopContinuousScroll();
                 
                 if (!messageContainer || !messageContent) return;
                 
-                // Reset scroll position
                 messageContainer.scrollTop = 0;
                 scrollPosition = 0;
                 speedIncreased = false;
                 currentSpeed = 0.15;
                 
-                // Use requestAnimationFrame for smoother animation on mobile
-                function smoothScroll() {
-                    if (!messageContainer || !document.getElementById('phase-4').classList.contains('active')) {
-                        if (rafId) {
-                            cancelAnimationFrame(rafId);
-                            rafId = null;
-                        }
-                        return;
-                    }
-                    
-                    // Check trigger line
-                    checkTriggerLinePosition();
-                    
-                    // Update scroll position
-                    scrollPosition += currentSpeed;
-                    
-                    if (scrollPosition >= maxScroll) {
-                        messageContainer.scrollTop = maxScroll;
-                        if (rafId) {
-                            cancelAnimationFrame(rafId);
-                            rafId = null;
-                        }
-                        setTimeout(() => {
-                            goToPhase(5);
-                        }, 2500);
-                        return;
-                    } else {
-                        messageContainer.scrollTop = scrollPosition;
-                    }
-                    
-                    // Continue animation
-                    rafId = requestAnimationFrame(smoothScroll);
-                }
-                
-                // Calculate max scroll after a short delay to ensure DOM is ready
                 setTimeout(() => {
                     const containerHeight = messageContainer.clientHeight;
                     const contentHeight = messageContent.scrollHeight;
@@ -1014,10 +1081,38 @@
                     maxScroll = contentHeight - containerHeight;
                     console.log('Max scroll calculated:', maxScroll);
                     
-                    if (maxScroll < 50) maxScroll = 300; // Fallback
+                    if (maxScroll < 50) maxScroll = 300;
                     
-                    // Start smooth scroll animation
-                    if (rafId) cancelAnimationFrame(rafId);
+                    function smoothScroll() {
+                        if (!messageContainer || !document.getElementById('phase-4').classList.contains('active')) {
+                            if (rafId) {
+                                cancelAnimationFrame(rafId);
+                                rafId = null;
+                            }
+                            return;
+                        }
+                        
+                        checkTriggerLinePosition();
+                        
+                        scrollPosition += currentSpeed;
+                        
+                        if (scrollPosition >= maxScroll) {
+                            messageContainer.scrollTop = maxScroll;
+                            if (rafId) {
+                                cancelAnimationFrame(rafId);
+                                rafId = null;
+                            }
+                            setTimeout(() => {
+                                goToPhase(5);
+                            }, 2500);
+                            return;
+                        } else {
+                            messageContainer.scrollTop = scrollPosition;
+                        }
+                        
+                        rafId = requestAnimationFrame(smoothScroll);
+                    }
+                    
                     rafId = requestAnimationFrame(smoothScroll);
                     
                 }, 500);
@@ -1028,10 +1123,6 @@
                     cancelAnimationFrame(rafId);
                     rafId = null;
                 }
-                if (scrollInterval) {
-                    clearInterval(scrollInterval);
-                    scrollInterval = null;
-                }
             }
 
             function checkTriggerLinePosition() {
@@ -1041,14 +1132,11 @@
                 const currentScroll = messageContainer.scrollTop;
                 const containerHeight = messageContainer.clientHeight;
                 
-                const triggerVisible = triggerTop - currentScroll < containerHeight - 50;
-                
-                if (triggerVisible && !speedIncreased) {
+                if (triggerTop - currentScroll < containerHeight - 50 && !speedIncreased) {
                     speedIncreased = true;
-                    currentSpeed = 1.2; // Speed up
+                    currentSpeed = 1.2;
                     console.log('Trigger line reached - speeding up!');
                     
-                    // Celebration hearts
                     for (let i = 0; i < 12; i++) {
                         setTimeout(createHeart, i * 50);
                     }
@@ -1231,6 +1319,12 @@
                 if (targetSection) {
                     targetSection.classList.add('active');
                 }
+                
+                // Try to play audio when phase changes
+                if (!audioPlayed) {
+                    music.play().catch(() => {});
+                    audioPlayed = true;
+                }
             };
 
             async function revealText() {
@@ -1304,6 +1398,7 @@
                         setTimeout(() => {
                             music.volume = 0.3;
                             music.play().catch(() => {});
+                            audioPlayed = true;
                             
                             goToPhase(4);
                             
