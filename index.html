@@ -776,7 +776,7 @@
         <button class="btn-base" id="continueBtn">Continue to My Heart 💝</button>
     </section>
 
-    <!-- Phase 2: Forgiveness Choice with FIXED No button for both desktop and mobile -->
+    <!-- Phase 2: Forgiveness Choice with PERFECT No button for desktop and mobile -->
     <section id="phase-2">
         <h2 class="gold-text">Will you forgive me?</h2>
         <div class="love-note" style="margin-bottom: 20px;">Your forgiveness means everything to me</div>
@@ -877,22 +877,17 @@
         <button class="play-video-btn" id="playVideoBtn">Play Our Special Video 🎬</button>
     </section>
 
-    <!-- FIXED AUDIO - Using multiple sources for reliability -->
-    <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
-        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
-    </audio>
+    <!-- NO AUDIO - Removed completely for GitHub compatibility -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded - initializing with FIXED AUDIO and MOBILE NO BUTTON...');
+            console.log('DOM loaded - NO AUDIO VERSION for GitHub...');
             
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
             const heartsDiv = document.getElementById('hearts');
             const videoContainer = document.getElementById('videoContainer');
             const video = document.getElementById('birthdayVideo');
-            const music = document.getElementById('bgMusic');
             const messageContainer = document.getElementById('messageContainer');
             const messageContent = document.getElementById('messageContent');
             const triggerLine = document.getElementById('triggerLine');
@@ -921,31 +916,6 @@
             let giftOpened = false;
             let messageTimeout = null;
             let rafId = null;
-            let audioPlayed = false;
-
-            // ----- FIXED AUDIO INITIALIZATION -----
-            function initAudio() {
-                music.volume = 0.3;
-                // Try to play audio (browsers require user interaction)
-                document.addEventListener('touchstart', function playOnTouch() {
-                    if (!audioPlayed) {
-                        music.play().catch(e => console.log('Audio play error:', e));
-                        audioPlayed = true;
-                    }
-                    document.removeEventListener('touchstart', playOnTouch);
-                });
-                
-                document.addEventListener('click', function playOnClick() {
-                    if (!audioPlayed) {
-                        music.play().catch(e => console.log('Audio play error:', e));
-                        audioPlayed = true;
-                    }
-                    document.removeEventListener('click', playOnClick);
-                });
-            }
-            
-            // Call audio init
-            initAudio();
 
             // ----- DESKTOP MOVING NO BUTTON -----
             if (forgiveNoBtn && noBtnMover) {
@@ -1143,7 +1113,7 @@
                 }
             }
 
-            // ----- OTHER FUNCTIONS (unchanged) -----
+            // ----- OTHER FUNCTIONS -----
             function createSparkle() {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'sparkle';
@@ -1319,12 +1289,6 @@
                 if (targetSection) {
                     targetSection.classList.add('active');
                 }
-                
-                // Try to play audio when phase changes
-                if (!audioPlayed) {
-                    music.play().catch(() => {});
-                    audioPlayed = true;
-                }
             };
 
             async function revealText() {
@@ -1340,7 +1304,6 @@
                 console.log('Playing video');
                 videoContainer.classList.add('active');
                 video.play().catch(e => console.log('Video play error:', e));
-                music.pause();
             }
 
             function closeVideo() {
@@ -1348,7 +1311,6 @@
                 video.pause();
                 video.currentTime = 0;
                 videoContainer.classList.remove('active');
-                music.play().catch(() => {});
             }
 
             // Surprise button click handler
@@ -1396,10 +1358,6 @@
                         console.log('Gift box opened with thrilling animations!');
                         
                         setTimeout(() => {
-                            music.volume = 0.3;
-                            music.play().catch(() => {});
-                            audioPlayed = true;
-                            
                             goToPhase(4);
                             
                             document.querySelectorAll('.msg-line').forEach(line => {
